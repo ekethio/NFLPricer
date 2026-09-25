@@ -1,197 +1,197 @@
 {
- "source": "2025 regular season actual results (nflverse). Replace with your own ratings anytime.",
+ "source": "NFL Pricer house ratings.",
  "league_avg_drives": 10.72,
  "default_hfa": 1.75,
  "teams": {
   "ARI": {
-   "oppd": 2.006,
-   "dppd": 2.667,
+   "oppd": 1.986,
+   "dppd": 2.407,
    "drives": -0.303,
    "hfa": null
   },
   "ATL": {
-   "oppd": 1.888,
-   "dppd": 2.203,
+   "oppd": 2.068,
+   "dppd": 2.233,
    "drives": 0.285,
    "hfa": null
   },
   "BAL": {
-   "oppd": 2.356,
-   "dppd": 2.187,
+   "oppd": 2.51,
+   "dppd": 2.1,
    "drives": -0.127,
    "hfa": null
   },
   "BUF": {
-   "oppd": 2.718,
-   "dppd": 2.062,
+   "oppd": 2.74,
+   "dppd": 2.15,
    "drives": -0.303,
    "hfa": null
   },
   "CAR": {
-   "oppd": 1.851,
-   "dppd": 2.235,
+   "oppd": 2.1,
+   "dppd": 2.345,
    "drives": -0.833,
    "hfa": null
   },
   "CHI": {
-   "oppd": 2.321,
-   "dppd": 2.231,
+   "oppd": 2.1,
+   "dppd": 2.34,
    "drives": 0.461,
    "hfa": null
   },
   "CIN": {
-   "oppd": 2.275,
-   "dppd": 2.659,
+   "oppd": 2.505,
+   "dppd": 2.279,
    "drives": -0.009,
    "hfa": null
   },
   "CLE": {
-   "oppd": 1.402,
-   "dppd": 1.867,
+   "oppd": 1.642,
+   "dppd": 2.107,
    "drives": 0.991,
    "hfa": null
   },
   "DAL": {
-   "oppd": 2.617,
-   "dppd": 2.871,
+   "oppd": 2.507,
+   "dppd": 2.371,
    "drives": -0.127,
    "hfa": null
   },
   "DEN": {
    "oppd": 2.089,
-   "dppd": 1.611,
+   "dppd": 1.9,
    "drives": 0.579,
    "hfa": null
   },
   "DET": {
-   "oppd": 2.545,
-   "dppd": 2.185,
+   "oppd": 2.45,
+   "dppd": 2.22,
    "drives": 0.403,
    "hfa": null
   },
   "GB": {
-   "oppd": 2.327,
-   "dppd": 2.209,
+   "oppd": 2.26,
+   "dppd": 2.33,
    "drives": -0.833,
    "hfa": null
   },
   "HOU": {
    "oppd": 2.04,
-   "dppd": 1.561,
+   "dppd": 1.78,
    "drives": 0.932,
    "hfa": null
   },
   "IND": {
-   "oppd": 2.678,
-   "dppd": 2.315,
+   "oppd": 1.948,
+   "dppd": 2.38,
    "drives": -0.48,
    "hfa": null
   },
   "JAX": {
-   "oppd": 2.456,
-   "dppd": 1.768,
+   "oppd": 2.35,
+   "dppd": 2.04,
    "drives": 0.638,
    "hfa": null
   },
   "KC": {
-   "oppd": 2.129,
-   "dppd": 1.929,
+   "oppd": 2.48,
+   "dppd": 2.12,
    "drives": -0.715,
    "hfa": null
   },
   "LA": {
-   "oppd": 2.815,
-   "dppd": 1.901,
+   "oppd": 2.6,
+   "dppd": 2.0,
    "drives": 0.108,
    "hfa": null
   },
   "LAC": {
-   "oppd": 2.079,
-   "dppd": 1.878,
+   "oppd": 2.149,
+   "dppd": 2.15,
    "drives": -0.303,
    "hfa": null
   },
   "LV": {
-   "oppd": 1.324,
-   "dppd": 2.387,
+   "oppd": 2.054,
+   "dppd": 2.327,
    "drives": -0.009,
    "hfa": null
   },
   "MIA": {
-   "oppd": 1.949,
-   "dppd": 2.382,
+   "oppd": 1.769,
+   "dppd": 2.502,
    "drives": -0.244,
    "hfa": null
   },
   "MIN": {
-   "oppd": 1.82,
-   "dppd": 1.781,
+   "oppd": 2.0,
+   "dppd": 1.89,
    "drives": 0.403,
    "hfa": null
   },
   "NE": {
-   "oppd": 2.722,
-   "dppd": 1.829,
+   "oppd": 2.3,
+   "dppd": 2.0,
    "drives": -0.127,
    "hfa": null
   },
   "NO": {
-   "oppd": 1.7,
-   "dppd": 2.082,
+   "oppd": 2.05,
+   "dppd": 2.252,
    "drives": -0.127,
    "hfa": null
   },
   "NYG": {
-   "oppd": 2.19,
-   "dppd": 2.386,
+   "oppd": 1.82,
+   "dppd": 2.276,
    "drives": -0.48,
    "hfa": null
   },
   "NYJ": {
-   "oppd": 1.604,
-   "dppd": 2.69,
+   "oppd": 1.994,
+   "dppd": 2.25,
    "drives": 0.285,
    "hfa": null
   },
   "PHI": {
-   "oppd": 2.082,
-   "dppd": 1.776,
+   "oppd": 2.28,
+   "dppd": 1.93,
    "drives": -0.009,
    "hfa": null
   },
   "PIT": {
-   "oppd": 2.181,
-   "dppd": 2.15,
+   "oppd": 1.881,
+   "dppd": 2.17,
    "drives": -0.009,
    "hfa": null
   },
   "SEA": {
-   "oppd": 2.503,
-   "dppd": 1.497,
+   "oppd": 2.14,
+   "dppd": 1.7,
    "drives": 0.638,
    "hfa": null
   },
   "SF": {
-   "oppd": 2.541,
-   "dppd": 2.182,
+   "oppd": 2.601,
+   "dppd": 2.1,
    "drives": -0.597,
    "hfa": null
   },
   "TB": {
-   "oppd": 2.021,
-   "dppd": 2.234,
+   "oppd": 2.101,
+   "dppd": 2.264,
    "drives": 0.344,
    "hfa": null
   },
   "TEN": {
-   "oppd": 1.519,
-   "dppd": 2.529,
+   "oppd": 1.789,
+   "dppd": 2.379,
    "drives": 0.285,
    "hfa": null
   },
   "WAS": {
-   "oppd": 2.094,
-   "dppd": 2.637,
+   "oppd": 1.914,
+   "dppd": 2.407,
    "drives": -0.715,
    "hfa": null
   }
