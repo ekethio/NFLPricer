@@ -177,7 +177,7 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const f1=v=>Number(v).toFixed(1);
 
-let BASE=null, SCHED=null, INJ=null, META=null, U=null;
+let BASE=null, SCHED=null, INJ=null, META=null, EFF=null, U=null;
 
 /* ---------- storage ---------- */
 function freshUser(){return{ratings:JSON.parse(JSON.stringify(BASE.teams)),
@@ -271,15 +271,23 @@ function renderInjBody(){
 /* ---------- ratings ---------- */
 let rSort={k:'team',asc:true};
 function renderRatings(){
-  $('ratings-lede').textContent=`OPPD and DPPD are points per drive against a league-average opponent. Drives is pace vs. league average. Leave home field blank to use the default. Rating = (OPPD − DPPD) × league avg drives, for viewing only. Starting values: ${BASE.source}`;
-  const rows=ABBRS.map(t=>({t,team:TEAMS[t],...U.ratings[t],rating:(U.ratings[t].oppd-U.ratings[t].dppd)*U.settings.league_avg_drives}));
+  const E=(EFF&&EFF.teams)||{}, wk=EFF&&EFF.weeks&&EFF.weeks.length?`Weeks ${EFF.weeks[0]}–${EFF.weeks[EFF.weeks.length-1]}`:'';
+  $('ratings-lede').textContent=`ORTG and DRTG are points per drive against a league-average opponent. Drives is pace vs. league average. Leave home field blank to use the default. Rating = (ORTG − DRTG) × league avg drives, for viewing only. The 2026 columns are actual results${wk?` (${wk})`:''} for reference and aren't used in pricing.${EFF&&EFF.league&&EFF.league.epa!=null?` League EPA/play ${EFF.league.epa.toFixed(3)}, YPP ${EFF.league.ypp.toFixed(2)}.`:''}`;
+  const rows=ABBRS.map(t=>{const e=E[t]||{};return{t,team:TEAMS[t],...U.ratings[t],rating:(U.ratings[t].oppd-U.ratings[t].dppd)*U.settings.league_avg_drives,
+    o_epa:e.o_epa,o_ypp:e.o_ypp,d_epa:e.d_epa,d_ypp:e.d_ypp}});
   const k=rSort.k;rows.sort((a,b)=>{let x=a[k],y=b[k];if(k==='hfa'){x=x??U.settings.default_hfa;y=y??U.settings.default_hfa}
+    if(x==null)return 1;if(y==null)return -1;
     if(typeof x==='string')return rSort.asc?x.localeCompare(y):y.localeCompare(x);return rSort.asc?x-y:y-x});
   const col=(key,label)=>`<th class="${key==='team'?'l':''}" aria-sort="${rSort.k===key?(rSort.asc?'ascending':'descending'):'none'}"><button data-s="${key}">${label}${rSort.k===key?(rSort.asc?' ▲':' ▼'):''}</button></th>`;
-  const inp=(t,k,st)=>`<input type="number" step="${st}" data-t="${t}" data-k="${k}" value="${U.ratings[t][k]??''}" ${k==='hfa'?`placeholder="${U.settings.default_hfa}"`:''} aria-label="${k} for ${TEAMS[t]}">`;
-  $('ratings-table').innerHTML='<table><thead><tr>'+col('team','Team')+col('oppd','OPPD')+col('dppd','DPPD')+col('drives','Drives')+col('hfa','Home field')+col('rating','Rating')+'</tr></thead><tbody>'+
+  const inp=(t,k,st)=>`<input type="number" step="${st}" data-t="${t}" data-k="${k}" value="${U.ratings[t][k]??''}" ${k==='hfa'?`placeholder="${U.settings.default_hfa}"`:''} aria-label="${({oppd:'ORTG',dppd:'DRTG'})[k]||k} for ${TEAMS[t]}">`;
+  const epa=(v,lowGood)=>{if(v==null)return'–';const good=lowGood?v<0:v>0,bad=lowGood?v>0:v<0;return`<span class="${good?'pos':bad?'neg':''}">${v>0?'+':''}${v.toFixed(3)}</span>`};
+  const ypp=v=>v==null?'–':v.toFixed(2);
+  $('ratings-table').innerHTML='<table><thead><tr class="group"><th></th><th colspan="5">Your ratings</th><th colspan="2">2026 offense</th><th colspan="2">2026 defense (allowed)</th></tr><tr>'+
+    col('team','Team')+col('oppd','ORTG')+col('dppd','DRTG')+col('drives','Drives')+col('hfa','Home field')+col('rating','Rating')+
+    col('o_epa','EPA/play')+col('o_ypp','YPP')+col('d_epa','EPA/play')+col('d_ypp','YPP')+'</tr></thead><tbody>'+
     rows.map(r=>`<tr><td class="l tm">${r.team}</td><td>${inp(r.t,'oppd','0.01')}</td><td>${inp(r.t,'dppd','0.01')}</td><td>${inp(r.t,'drives','0.01')}</td><td>${inp(r.t,'hfa','0.05')}</td>
-      <td id="rt-${r.t}" class="${r.rating>0?'pos':r.rating<0?'neg':''}">${r.rating>0?'+':''}${r.rating.toFixed(2)}</td></tr>`).join('')+'</tbody></table>';
+      <td id="rt-${r.t}" class="${r.rating>0?'pos':r.rating<0?'neg':''}">${r.rating>0?'+':''}${r.rating.toFixed(2)}</td>
+      <td>${epa(r.o_epa,false)}</td><td>${ypp(r.o_ypp)}</td><td>${epa(r.d_epa,true)}</td><td>${ypp(r.d_ypp)}</td></tr>`).join('')+'</tbody></table>';
   $('ratings-table').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const s=b.dataset.s;rSort=rSort.k===s?{k:s,asc:!rSort.asc}:{k:s,asc:s==='team'};renderRatings()});
   $('ratings-table').querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>{const t=i.dataset.t,k=i.dataset.k;
     U.ratings[t][k]=k==='hfa'&&i.value.trim()===''?null:(parseFloat(i.value)||0);
@@ -311,6 +319,7 @@ function renderAll(){renderRatings();renderSettings();renderInjGrid();if(injTeam
   try{
     const get=p=>fetch(p,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(p);return r.json()});
     [BASE,SCHED,INJ,META]=await Promise.all([get('data/ratings.json'),get('data/schedule.json'),get('data/injuries.json'),get('data/meta.json')]);
+    EFF=await get('data/efficiency.json').catch(()=>null);
   }catch(e){$('stamp').textContent='Couldn\u2019t load the data files. Refresh the page to try again.';return}
   U=load()||freshUser();U.injuries=U.injuries||{};
   ABBRS.forEach(t=>{if(!U.ratings[t])U.ratings[t]=JSON.parse(JSON.stringify(BASE.teams[t]))});
