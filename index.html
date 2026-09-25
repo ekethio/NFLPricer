@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NFL Pricer</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF0F2;--surface:#FFFFFF;--sunk:#F5F7F8;--ink:#16212C;--muted:#5A6977;--rule:#D3DAE0;
+  --pos:#23744A;--neg:#B23C2B;--accent:#B8841F;--accent-ink:#FFFFFF;--focus:#1F5FA8;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root{--bg:#0E151C;--surface:#152029;--sunk:#111A22;--ink:#E4EAEF;--muted:#93A3B2;--rule:#26343F;
+  --pos:#4DB57C;--neg:#E2745F;--accent:#E1AA45;--accent-ink:#1A1206;--focus:#6FA8E6}}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--rule)}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px 6px}
+h1{font-family:var(--display);font-weight:700;font-size:1.7rem;margin:0;line-height:1}
+.stamp{color:var(--muted);font-size:.82rem}
+nav{display:flex;gap:2px;overflow-x:auto;padding:0 12px;scrollbar-width:none}nav::-webkit-scrollbar{display:none}
+nav button{font-family:var(--display);font-weight:600;font-size:1.05rem;background:none;border:0;color:var(--muted);padding:10px 12px 9px;
+  border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+main{padding:16px 18px 48px;max-width:1180px}
+section[hidden]{display:none}
+h2{font-family:var(--display);font-weight:700;font-size:1.35rem;margin:0 0 4px}
+h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:20px 0 8px}
+.lede{color:var(--muted);margin:0 0 14px;max-width:72ch}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:14px 16px;margin-bottom:16px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--rule);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:7px 10px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+th:first-child,td:first-child,.l{text-align:left}
+thead th{background:var(--sunk);font-weight:600;color:var(--muted);font-size:.8rem}
+thead th button{all:unset;cursor:pointer}thead th button:focus-visible{outline:2px solid var(--focus)}
+tr.group th{background:var(--surface);text-align:center;font-weight:500;font-size:.78rem}
+tbody tr:hover td{background:var(--sunk)}
+.pos{color:var(--pos);font-weight:600}.neg{color:var(--neg);font-weight:600}.muted,.sub{color:var(--muted)}.sub{font-size:.8rem}.tm{font-weight:600}
+input,select{font:inherit;font-size:.9rem;background:var(--sunk);color:var(--ink);border:1px solid var(--rule);border-radius:4px;padding:5px 7px}
+td input{width:74px;text-align:right}
+.fields{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.fields label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--muted)}
+.fields input{width:100px}.fields select{min-width:190px}
+.inline{flex-direction:row!important;align-items:center;gap:6px!important;color:var(--ink)!important;font-size:.9rem!important}
+.btn{font:inherit;font-size:.88rem;font-weight:600;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:5px;padding:7px 12px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:3px 9px;font-size:.8rem}
+.result{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.score{border:1px solid var(--rule);border-radius:6px;padding:10px 14px}.score .n{font-family:var(--display);font-size:2.1rem;font-weight:700;line-height:1}
+.lines{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.lines div{border-top:1px solid var(--rule);padding-top:6px}.lines b{display:block;font-family:var(--display);font-size:1.25rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px;margin-bottom:14px}
+.grid button{font-family:var(--display);font-weight:600;font-size:1rem;background:var(--surface);color:var(--ink);border:1px solid var(--rule);
+  border-radius:5px;padding:8px 0 6px;cursor:pointer}
+.grid button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 -3px 0 var(--accent)}
+.grid .ct{display:block;font-family:var(--body);font-size:.7rem;color:var(--muted);font-weight:500}
+.placeholder{border-left:4px solid var(--accent);background:var(--surface);padding:10px 14px;margin:0 0 16px;max-width:72ch;font-size:.88rem}
+.empty{color:var(--muted);padding:10px 0}
+@media (max-width:640px){main{padding:12px 12px 40px}.brand{padding:12px 12px 4px}.result{grid-template-columns:1fr}
+  .fields label{flex:1 1 140px}.fields select,.fields input{width:100%;min-width:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>NFL Pricer</h1><span class="stamp" id="stamp">Loading…</span></div>
+  <nav role="tablist">
+    <button role="tab" aria-selected="true" data-tab="week">This week</button>
+    <button role="tab" aria-selected="false" data-tab="matchup">Matchup</button>
+    <button role="tab" aria-selected="false" data-tab="injuries">Injuries</button>
+    <button role="tab" aria-selected="false" data-tab="ratings">Ratings</button>
+    <button role="tab" aria-selected="false" data-tab="settings">Settings</button>
+  </nav>
+</header>
+<main>
+  <div class="placeholder" id="median-note" hidden>Median lines currently equal the mean lines. The mean-to-median conversion hasn't been added yet.</div>
+
+  <section id="tab-week">
+    <h2>This week's games</h2>
+    <p class="lede">Every game priced with your ratings and injury adjustments. Lines are from the home team's side.</p>
+    <div class="fields" style="margin-bottom:12px"><label>Week<select id="wk"></select></label></div>
+    <div class="scroll" id="week-table"></div>
+  </section>
+
+  <section id="tab-matchup" hidden>
+    <h2>Matchup</h2>
+    <p class="lede">Price any pairing, including against a league-average team.</p>
+    <div class="panel">
+      <div class="fields">
+        <label>Home<select id="m-home"></select></label>
+        <label>Away<select id="m-away"></select></label>
+        <label class="inline"><input type="checkbox" id="m-neutral">Neutral field</label>
+      </div>
+      <div class="result">
+        <div class="score"><div class="sub" id="m-hname"></div><div class="n" id="m-hpts">–</div><div class="sub" id="m-hinj"></div></div>
+        <div class="score"><div class="sub" id="m-aname"></div><div class="n" id="m-apts">–</div><div class="sub" id="m-ainj"></div></div>
+      </div>
+      <div class="lines">
+        <div><span class="sub">Mean spread</span><b id="m-ms">–</b></div><div><span class="sub">Mean total</span><b id="m-mt">–</b></div>
+        <div><span class="sub">Median spread</span><b id="m-ds">–</b></div><div><span class="sub">Median total</span><b id="m-dt">–</b></div>
+        <div><span class="sub">Game drives</span><b id="m-dr">–</b></div><div><span class="sub">Home field used</span><b id="m-hfa">–</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-injuries" hidden>
+    <h2>Injury adjustments</h2>
+    <p class="lede">For each player, enter what his absence is worth in points and the chance he misses the game. The team's adjustment is value × chance, added up.</p>
+    <div class="grid" id="inj-grid"></div>
+    <div id="inj-body"><p class="empty">Pick a team.</p></div>
+  </section>
+
+  <section id="tab-ratings" hidden>
+    <h2>Team ratings</h2>
+    <p class="lede" id="ratings-lede"></p>
+    <div class="scroll" id="ratings-table"></div>
+    <p style="margin-top:12px"><button class="btn" id="reset-ratings">Reset ratings to the site's starting values</button></p>
+  </section>
+
+  <section id="tab-settings" hidden>
+    <h2>Settings</h2>
+    <div class="panel">
+      <div class="fields">
+        <label>League avg drives per team<input type="number" step="0.01" id="s-drives"></label>
+        <label>Default home field (pts)<input type="number" step="0.05" id="s-hfa"></label>
+        <label>League avg points per drive (auto)<input type="text" id="s-ppd" readonly></label>
+      </div>
+      <h3>Injuries move</h3>
+      <div class="fields">
+        <label class="inline"><input type="radio" name="imode" value="both">The spread and the total (points come off the injured team)</label>
+        <label class="inline"><input type="radio" name="imode" value="spread">The spread only (total stays the same)</label>
+      </div>
+    </div>
+    <div class="panel">
+      <h3 style="margin-top:0">Your data</h3>
+      <p class="lede">Everything you enter stays in this browser on this device. Download a backup to keep it or move it to another device.</p>
+      <p style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" id="export">Download my settings</button>
+        <button class="btn" id="import-btn">Load settings from a file</button>
+        <input type="file" id="import" accept="application/json" hidden>
+        <button class="btn" id="wipe">Clear everything</button>
+      </p>
+      <p class="sub" id="io-msg"></p>
+    </div>
+  </section>
+</main>
+
+<script>
+/* =====================================================================
+   MEAN -> MEDIAN CONVERSION
+   Replace the body of this function with the real conversion.
+   Input: mean spread (home side, negative = home favored) and mean total.
+   Output: the median spread and median total.
+   ===================================================================== */
+const MEDIAN_READY = false;
+function toMedian(meanSpread, meanTotal){
+  return { spread: meanSpread, total: meanTotal };
+}
+
+const TEAMS={ARI:'Arizona Cardinals',ATL:'Atlanta Falcons',BAL:'Baltimore Ravens',BUF:'Buffalo Bills',CAR:'Carolina Panthers',
+CHI:'Chicago Bears',CIN:'Cincinnati Bengals',CLE:'Cleveland Browns',DAL:'Dallas Cowboys',DEN:'Denver Broncos',DET:'Detroit Lions',
+GB:'Green Bay Packers',HOU:'Houston Texans',IND:'Indianapolis Colts',JAX:'Jacksonville Jaguars',KC:'Kansas City Chiefs',
+LA:'Los Angeles Rams',LAC:'Los Angeles Chargers',LV:'Las Vegas Raiders',MIA:'Miami Dolphins',MIN:'Minnesota Vikings',
+NE:'New England Patriots',NO:'New Orleans Saints',NYG:'New York Giants',NYJ:'New York Jets',PHI:'Philadelphia Eagles',
+PIT:'Pittsburgh Steelers',SEA:'Seattle Seahawks',SF:'San Francisco 49ers',TB:'Tampa Bay Buccaneers',TEN:'Tennessee Titans',
+WAS:'Washington Commanders'};
+const ABBRS=Object.keys(TEAMS).sort((a,b)=>TEAMS[a].localeCompare(TEAMS[b]));
+const KEY='nflpricer.v1';
+const STATUS_CHANCE={Out:1,Doubtful:0.75,Questionable:0.25};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const f1=v=>Number(v).toFixed(1);
+
+let BASE=null, SCHED=null, INJ=null, META=null, U=null;
+
+/* ---------- storage ---------- */
+function freshUser(){return{ratings:JSON.parse(JSON.stringify(BASE.teams)),
+  settings:{league_avg_drives:BASE.league_avg_drives,default_hfa:BASE.default_hfa,injury_mode:'both'},injuries:{}}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.ratings)return s}catch(e){}return null}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(U))}catch(e){}}
+
+/* ---------- math ---------- */
+function avgPPD(){let s=0,n=0;ABBRS.forEach(t=>{const r=U.ratings[t];if(r){s+=+r.oppd+ +r.dppd;n+=2}});return n?s/n:2.1}
+function rating(t){if(t==='AVG'){const a=avgPPD();return{oppd:a,dppd:a,drives:0,hfa:null}}return U.ratings[t]}
+function injAdj(t){return(U.injuries[t]||[]).reduce((s,p)=>s+(+p.value||0)*(+p.prob||0),0)}
+function price(H,A,neutral){
+  const h=rating(H),a=rating(A),avg=avgPPD(),S=U.settings;
+  const drives=S.league_avg_drives+(+h.drives)+(+a.drives);
+  const hfa=neutral?0:(h.hfa==null||h.hfa===''?S.default_hfa:+h.hfa);
+  let hp=(+h.oppd + +a.dppd - avg)*drives+hfa, ap=(+a.oppd + +h.dppd - avg)*drives;
+  const ih=H==='AVG'?0:injAdj(H), ia=A==='AVG'?0:injAdj(A);
+  if(S.injury_mode==='spread'){hp+=(-ih+ia)/2;ap+=(ih-ia)/2}else{hp-=ih;ap-=ia}
+  const meanSpread=ap-hp, meanTotal=hp+ap, med=toMedian(meanSpread,meanTotal);
+  return{hp,ap,drives,hfa,ih,ia,meanSpread,meanTotal,medSpread:med.spread,medTotal:med.total};
+}
+const lineTxt=(v,home,away)=>Math.abs(v)<0.05?'Pick':(v<0?`${home} −${f1(-v)}`:`${away} −${f1(v)}`);
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('main section').forEach(s=>s.hidden=s.id!=='tab-'+b.dataset.tab);
+});
+
+/* ---------- this week ---------- */
+function renderWeek(){
+  const wk=+$('wk').value;const games=SCHED.games.filter(g=>g[0]===wk);
+  if(!games.length){$('week-table').innerHTML='<p class="empty" style="padding:12px">No games found for this week.</p>';return}
+  let h='<table><thead><tr><th class="l">Game</th><th class="l">Kickoff</th><th>Injuries (away / home)</th><th>Mean spread</th><th>Mean total</th><th>Median spread</th><th>Median total</th><th>Final</th></tr></thead><tbody>';
+  games.forEach(g=>{const [w,day,time,A,H,as,hs,loc]=g;const neutral=loc==='Neutral';const p=price(H,A,neutral);
+    const d=new Date(day+'T12:00:00');const ko=d.toLocaleDateString([], {weekday:'short',month:'short',day:'numeric'})+(time?' '+time:'');
+    h+=`<tr><td class="l"><span class="tm">${A} @ ${H}</span>${neutral?' <span class="sub">(neutral)</span>':''}</td><td class="l sub">${esc(ko)}</td>
+      <td>${p.ia?'−'+f1(p.ia):'0'} / ${p.ih?'−'+f1(p.ih):'0'}</td>
+      <td>${lineTxt(p.meanSpread,H,A)}</td><td>${f1(p.meanTotal)}</td><td>${lineTxt(p.medSpread,H,A)}</td><td>${f1(p.medTotal)}</td>
+      <td class="sub">${as!=null&&hs!=null?`${A} ${as}, ${H} ${hs}`:''}</td></tr>`;});
+  $('week-table').innerHTML=h+'</tbody></table>';
+}
+
+/* ---------- matchup ---------- */
+function renderMatchup(){
+  const H=$('m-home').value,A=$('m-away').value,n=$('m-neutral').checked,p=price(H,A,n);
+  const nm=t=>t==='AVG'?'Average team':TEAMS[t];
+  $('m-hname').textContent=nm(H)+(n?'':' (home)');$('m-aname').textContent=nm(A);
+  $('m-hpts').textContent=f1(p.hp);$('m-apts').textContent=f1(p.ap);
+  $('m-hinj').textContent=p.ih?`Injuries −${f1(p.ih)}`:'';$('m-ainj').textContent=p.ia?`Injuries −${f1(p.ia)}`:'';
+  $('m-ms').textContent=lineTxt(p.meanSpread,nm(H),nm(A));$('m-mt').textContent=f1(p.meanTotal);
+  $('m-ds').textContent=lineTxt(p.medSpread,nm(H),nm(A));$('m-dt').textContent=f1(p.medTotal);
+  $('m-dr').textContent=p.drives.toFixed(2);$('m-hfa').textContent=f1(p.hfa);
+}
+
+/* ---------- injuries ---------- */
+let injTeam=null;
+function renderInjGrid(){
+  $('inj-grid').innerHTML=ABBRS.map(t=>{const a=injAdj(t);return`<button aria-pressed="${t===injTeam}" data-t="${t}" aria-label="${TEAMS[t]}">${t}<span class="ct">${a?'−'+f1(a):'–'}</span></button>`}).join('');
+  $('inj-grid').querySelectorAll('button').forEach(b=>b.onclick=()=>{injTeam=b.dataset.t;renderInjGrid();renderInjBody()});
+}
+function renderInjBody(){
+  if(!injTeam)return;const t=injTeam,mine=U.injuries[t]||(U.injuries[t]=[]);
+  let h=`<h3 style="margin-top:0">${TEAMS[t]}: your adjustments <span class="sub">(total −${f1(injAdj(t))} pts)</span></h3>`;
+  if(!mine.length)h+='<p class="empty">No players added. Add from the report below or enter one yourself.</p>';
+  else h+='<div class="scroll"><table><thead><tr><th class="l">Player</th><th>Value (pts)</th><th>Chance he misses</th><th>Adjustment</th><th></th></tr></thead><tbody>'+
+    mine.map((p,i)=>`<tr><td class="l"><span class="tm">${esc(p.name)}</span> <span class="sub">${esc(p.pos||'')}</span></td>
+      <td><input type="number" step="0.1" min="0" data-i="${i}" data-k="value" value="${p.value}" aria-label="Value for ${esc(p.name)}"></td>
+      <td><input type="number" step="5" min="0" max="100" data-i="${i}" data-k="prob" value="${Math.round(p.prob*100)}" aria-label="Chance ${esc(p.name)} misses, percent"> %</td>
+      <td id="adj-${i}">−${f1(p.value*p.prob)}</td><td><button class="btn small" data-rm="${i}">Remove</button></td></tr>`).join('')+'</tbody></table></div>';
+  h+=`<div class="fields" style="margin:12px 0 4px"><label>Add a player<input type="text" id="add-name" placeholder="Name" style="width:180px"></label>
+      <button class="btn" id="add-btn">Add</button></div>`;
+  const left=(INJ.left_game.teams||{})[t]||[];
+  if(left.length)h+=`<h3>Left a Week ${INJ.left_game.week} game and didn't return</h3><p>${left.map(esc).join(', ')} <span class="sub">(from play-by-play text, which misses some exits)</span></p>`;
+  const rep=(INJ.report.teams||{})[t]||[];
+  h+=`<h3>Official injury report${INJ.report.week?`, Week ${INJ.report.week}`:''}</h3>`;
+  if(!rep.length)h+='<p class="empty">No players listed.</p>';
+  else h+='<p class="sub">Adding a player fills in a starting chance from his game status (Out 100%, Doubtful 75%, Questionable 25%). Change it to your own number.</p><div class="scroll"><table><thead><tr><th class="l">Player</th><th class="l">Pos</th><th class="l">Injury</th><th class="l">Practice</th><th class="l">Status</th><th></th></tr></thead><tbody>'+
+    rep.map((r,i)=>{const added=mine.some(p=>p.name===r[0]);return`<tr><td class="l">${esc(r[0])}</td><td class="l">${esc(r[1])}</td><td class="l">${esc(r[2])||'–'}</td>
+      <td class="l sub">${esc(r[3])||'–'}</td><td class="l">${esc(r[4])||'–'}</td><td>${added?'<span class="sub">Added</span>':`<button class="btn small" data-add="${i}">Add</button>`}</td></tr>`}).join('')+'</tbody></table></div>';
+  $('inj-body').innerHTML=h;
+  $('inj-body').querySelectorAll('input[data-i]').forEach(inp=>inp.addEventListener('input',()=>{const p=mine[+inp.dataset.i];
+    if(inp.dataset.k==='prob')p.prob=Math.min(100,Math.max(0,parseFloat(inp.value)||0))/100;else p.value=Math.max(0,parseFloat(inp.value)||0);
+    $('adj-'+inp.dataset.i).textContent='−'+f1(p.value*p.prob);save();renderInjGrid();refreshPrices();}));
+  $('inj-body').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{mine.splice(+b.dataset.rm,1);save();renderInjGrid();renderInjBody();refreshPrices()});
+  $('inj-body').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const r=rep[+b.dataset.add];
+    mine.push({name:r[0],pos:r[1],value:0,prob:STATUS_CHANCE[r[4]]??0});save();renderInjBody()});
+  $('add-btn').onclick=()=>{const n=$('add-name').value.trim();if(!n)return;mine.push({name:n,pos:'',value:0,prob:0});save();renderInjBody()};
+}
+
+/* ---------- ratings ---------- */
+let rSort={k:'team',asc:true};
+function renderRatings(){
+  $('ratings-lede').textContent=`OPPD and DPPD are points per drive against a league-average opponent. Drives is pace vs. league average. Leave home field blank to use the default. Rating = (OPPD − DPPD) × league avg drives, for viewing only. Starting values: ${BASE.source}`;
+  const rows=ABBRS.map(t=>({t,team:TEAMS[t],...U.ratings[t],rating:(U.ratings[t].oppd-U.ratings[t].dppd)*U.settings.league_avg_drives}));
+  const k=rSort.k;rows.sort((a,b)=>{let x=a[k],y=b[k];if(k==='hfa'){x=x??U.settings.default_hfa;y=y??U.settings.default_hfa}
+    if(typeof x==='string')return rSort.asc?x.localeCompare(y):y.localeCompare(x);return rSort.asc?x-y:y-x});
+  const col=(key,label)=>`<th class="${key==='team'?'l':''}" aria-sort="${rSort.k===key?(rSort.asc?'ascending':'descending'):'none'}"><button data-s="${key}">${label}${rSort.k===key?(rSort.asc?' ▲':' ▼'):''}</button></th>`;
+  const inp=(t,k,st)=>`<input type="number" step="${st}" data-t="${t}" data-k="${k}" value="${U.ratings[t][k]??''}" ${k==='hfa'?`placeholder="${U.settings.default_hfa}"`:''} aria-label="${k} for ${TEAMS[t]}">`;
+  $('ratings-table').innerHTML='<table><thead><tr>'+col('team','Team')+col('oppd','OPPD')+col('dppd','DPPD')+col('drives','Drives')+col('hfa','Home field')+col('rating','Rating')+'</tr></thead><tbody>'+
+    rows.map(r=>`<tr><td class="l tm">${r.team}</td><td>${inp(r.t,'oppd','0.01')}</td><td>${inp(r.t,'dppd','0.01')}</td><td>${inp(r.t,'drives','0.01')}</td><td>${inp(r.t,'hfa','0.05')}</td>
+      <td id="rt-${r.t}" class="${r.rating>0?'pos':r.rating<0?'neg':''}">${r.rating>0?'+':''}${r.rating.toFixed(2)}</td></tr>`).join('')+'</tbody></table>';
+  $('ratings-table').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const s=b.dataset.s;rSort=rSort.k===s?{k:s,asc:!rSort.asc}:{k:s,asc:s==='team'};renderRatings()});
+  $('ratings-table').querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>{const t=i.dataset.t,k=i.dataset.k;
+    U.ratings[t][k]=k==='hfa'&&i.value.trim()===''?null:(parseFloat(i.value)||0);
+    const r=(U.ratings[t].oppd-U.ratings[t].dppd)*U.settings.league_avg_drives;const c=$('rt-'+t);c.textContent=(r>0?'+':'')+r.toFixed(2);c.className=r>0?'pos':r<0?'neg':'';
+    save();refreshPrices();}));
+}
+$('reset-ratings').onclick=()=>{if(!confirm('Replace all your ratings with the site\u2019s starting values?'))return;U.ratings=JSON.parse(JSON.stringify(BASE.teams));save();renderRatings();refreshPrices()};
+
+/* ---------- settings ---------- */
+function renderSettings(){
+  $('s-drives').value=U.settings.league_avg_drives;$('s-hfa').value=U.settings.default_hfa;$('s-ppd').value=avgPPD().toFixed(3);
+  document.querySelectorAll('input[name=imode]').forEach(r=>r.checked=r.value===U.settings.injury_mode);
+}
+$('s-drives').onchange=()=>{U.settings.league_avg_drives=parseFloat($('s-drives').value)||0;save();refreshPrices();renderRatings()};
+$('s-hfa').onchange=()=>{U.settings.default_hfa=parseFloat($('s-hfa').value)||0;save();refreshPrices();renderRatings()};
+document.querySelectorAll('input[name=imode]').forEach(r=>r.onchange=()=>{U.settings.injury_mode=r.value;save();refreshPrices()});
+$('export').onclick=()=>{const blob=new Blob([JSON.stringify(U,null,1)],{type:'application/json'});const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='nfl-pricer-settings.json';a.click();URL.revokeObjectURL(a.href);$('io-msg').textContent='Downloaded.'};
+$('import-btn').onclick=()=>$('import').click();
+$('import').onchange=async()=>{const f=$('import').files[0];if(!f)return;try{const d=JSON.parse(await f.text());
+  if(!d.ratings||!d.settings)throw 0;U={...freshUser(),...d};save();renderAll();$('io-msg').textContent='Settings loaded.'}
+  catch(e){$('io-msg').textContent='That file isn\u2019t an NFL Pricer settings file. Nothing was changed.'}};
+$('wipe').onclick=()=>{if(!confirm('Clear all your ratings and injury adjustments from this browser?'))return;U=freshUser();save();renderAll();$('io-msg').textContent='Cleared.'};
+
+/* ---------- boot ---------- */
+function refreshPrices(){renderWeek();renderMatchup();$('s-ppd').value=avgPPD().toFixed(3)}
+function renderAll(){renderRatings();renderSettings();renderInjGrid();if(injTeam)renderInjBody();refreshPrices()}
+(async()=>{
+  try{
+    const get=p=>fetch(p,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(p);return r.json()});
+    [BASE,SCHED,INJ,META]=await Promise.all([get('data/ratings.json'),get('data/schedule.json'),get('data/injuries.json'),get('data/meta.json')]);
+  }catch(e){$('stamp').textContent='Couldn\u2019t load the data files. Refresh the page to try again.';return}
+  U=load()||freshUser();U.injuries=U.injuries||{};
+  ABBRS.forEach(t=>{if(!U.ratings[t])U.ratings[t]=JSON.parse(JSON.stringify(BASE.teams[t]))});
+  $('median-note').hidden=MEDIAN_READY;
+  const up=new Date(META.updated_at);$('stamp').textContent=`${META.season} season, Week ${META.current_week}. Data updated ${up.toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}`;
+  const weeks=[...new Set(SCHED.games.map(g=>g[0]))];$('wk').innerHTML=weeks.map(w=>`<option value="${w}">Week ${w}</option>`).join('');
+  $('wk').value=SCHED.current_week;$('wk').onchange=renderWeek;
+  const opts='<option value="AVG">Average team</option>'+ABBRS.map(t=>`<option value="${t}">${TEAMS[t]}</option>`).join('');
+  $('m-home').innerHTML=opts;$('m-away').innerHTML=opts;$('m-home').value='BUF';$('m-away').value='DET';
+  ['m-home','m-away','m-neutral'].forEach(id=>$(id).onchange=renderMatchup);
+  renderAll();
+})();
+</script>
+</body>
+</html>
