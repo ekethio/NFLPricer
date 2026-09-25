@@ -1,7 +1,7 @@
 """Refresh the site's data files from nflverse.
 
 Runs on GitHub's scheduler. Uses only the Python standard library.
-Writes site/data/schedule.json, site/data/injuries.json and site/data/meta.json.
+Writes site/data/schedule.json, injuries.json, efficiency.json and meta.json.
 If a download fails, that file is written with an error note so the site still publishes.
 """
 import csv, gzip, io, json, re, urllib.request, datetime, os
@@ -72,12 +72,41 @@ except Exception as e:
     notes.append(f"Injury report update failed: {e}")
     report = {"week": None, "teams": {}, "error": str(e)}
 
-# ---------- players who left a game and didn't return (last played week) ----------
+# ---------- play-by-play: 2026 efficiency + players who left a game ----------
 left = {"week": None, "teams": {}}
+eff = {"season": season, "weeks": [], "league": {}, "teams": {}}
 try:
     pbp = fetch_csv(f"{BASE}/pbp/play_by_play_{season}.csv.gz", gz=True)
     pbp = [r for r in pbp if r["season_type"] == "REG"]
-    last = max(int(r["week"]) for r in pbp)
+
+    # EPA/play and yards/play, offense and defense (pass + run plays only)
+    def fnum(v):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return None
+    agg = {}
+    tot = [0.0, 0.0, 0]
+    for r in pbp:
+        if r["play_type"] not in ("pass", "run"):
+            continue
+        epa, yds = fnum(r["epa"]), fnum(r["yards_gained"]) or 0.0
+        if epa is None or not r["posteam"] or not r["defteam"]:
+            continue
+        for team, side in ((r["posteam"], "o"), (r["defteam"], "d")):
+            a = agg.setdefault(team, {"o": [0.0, 0.0, 0], "d": [0.0, 0.0, 0]})[side]
+            a[0] += epa; a[1] += yds; a[2] += 1
+        tot[0] += epa; tot[1] += yds; tot[2] += 1
+    for team, a in agg.items():
+        eff["teams"][team] = {
+            "o_epa": round(a["o"][0] / a["o"][2], 3), "o_ypp": round(a["o"][1] / a["o"][2], 2), "o_plays": a["o"][2],
+            "d_epa": round(a["d"][0] / a["d"][2], 3), "d_ypp": round(a["d"][1] / a["d"][2], 2), "d_plays": a["d"][2],
+        }
+    if tot[2]:
+        eff["league"] = {"epa": round(tot[0] / tot[2], 4), "ypp": round(tot[1] / tot[2], 3)}
+    eff["weeks"] = sorted({int(r["week"]) for r in pbp})
+
+    last = max(eff["weeks"])
     hurt = re.compile(r"([A-Z]{2,3})-(\d+)-([A-Za-z.'\-]+) was injured during the play")
     back = re.compile(r"([A-Z]{2,3})-(\d+)-([A-Za-z.'\-]+) has returned to the game")
     seen = {}
@@ -91,9 +120,11 @@ try:
             left["teams"].setdefault(team, []).append(name)
     left["week"] = last
 except Exception as e:
-    notes.append(f"In-game injury update failed: {e}")
+    notes.append(f"Play-by-play update failed: {e}")
     left["error"] = str(e)
+    eff["error"] = str(e)
 
+save("efficiency.json", eff)
 save("injuries.json", {"report": report, "left_game": left})
 save("meta.json", {
     "updated_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
