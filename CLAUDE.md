@@ -66,7 +66,7 @@ Ratings are per team, entered as absolute values:
 - **Drives:** pace as a differential vs. league average (+1 = one more drive per game than average). Drives reflect both tempo and efficiency (bad offenses and good defenses both create more drives); that's intended.
 - **Home field:** points per team; blank means the default (1.75).
 
-Do **not** rename the internal keys `oppd`/`dppd`, or change what they store. Users' saved browser data depends on them. They hold **absolute** points per drive; since 2026-09-26 the Ratings tab **shows and edits them as differences from `league_avg_ppd`** (a setting, like `league_avg_drives`; in `ratings.json` and user settings). Saved data from before that has no `league_avg_ppd`; `migrate()` sets it to the mean of that data's 64 values, which reproduces its old prices exactly. Changing the league average in Settings shifts every `oppd`/`dppd` by the same amount, so differences stay put. The starting ratings are normalized: ORTG and DRTG differences each sum to exactly 0, so average Rating is 0.
+Do **not** rename the internal keys `oppd`/`dppd`, or change what they store. Users' saved browser data depends on them. They hold **absolute** points per drive; since 2026-09-26 the Ratings tab **shows and edits them as points per game vs. average**: ORTG = (oppd − league_avg_ppd) × league_avg_drives, DRTG = −(dppd − league_avg_ppd) × league_avg_drives (positive = better defense), so Rating = ORTG + DRTG. This is display only (`toShown`/`fromShown`); pricing reads `oppd`/`dppd`. `league_avg_ppd` is a setting, like `league_avg_drives` (in `ratings.json` and user settings). Saved data from before that has no `league_avg_ppd`; `migrate()` sets it to the mean of that data's 64 values, which reproduces its old prices exactly. Changing the league average in Settings shifts every `oppd`/`dppd` by the same amount, so differences stay put. The starting ratings are normalized: ORTG and DRTG differences each sum to exactly 0, so average Rating is 0.
 
 Game math (additive, the owner's naive starting point):
 ```
@@ -83,7 +83,7 @@ MeanTotal    = HomePts + AwayPts
 - **Drives are summed:** two +1 pace teams produce +2 drives, not +1.
 - **"Average team"** is a selectable opponent: ORTG = DRTG = LeagueAvgPPD, Drives 0.
 - **Neutral field** sets home field to 0.
-- **Rating column (view only, not used in pricing):** (ORTG − DRTG) × LeagueAvgDrives.
+- **Rating column (view only, not used in pricing):** (oppd − dppd) × LeagueAvgDrives, which equals shown ORTG + shown DRTG.
 
 Injuries:
 - Each player has a value (points) and a chance of missing the game. Team adjustment = Σ value × chance.
