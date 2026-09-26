@@ -80,7 +80,7 @@ td input{width:74px;text-align:right}
   </nav>
 </header>
 <main>
-  <div class="placeholder" id="median-note" hidden>Median lines currently equal the mean lines. The mean-to-median conversion hasn't been added yet.</div>
+  <div class="placeholder" id="median-note" hidden>Median totals are the mean total minus 0.85 (NFL totals run right-skewed; 2015–2025 average). Median spreads still equal the mean spreads.</div>
 
   <section id="tab-week">
     <h2>This week's games</h2>
@@ -159,13 +159,18 @@ td input{width:74px;text-align:right}
 <script>
 /* =====================================================================
    MEAN -> MEDIAN CONVERSION
-   Replace the body of this function with the real conversion.
    Input: mean spread (home side, negative = home favored) and mean total.
    Output: the median spread and median total.
+   Totals: NFL game totals are right-skewed, so the median sits below the mean.
+   Over 2015-2025 regular seasons (2,895 games, closing total as the expected
+   total) the median ran 0.85 below the mean, negative in 9 of 11 seasons. A shift
+   that depends on the total fit no better (slope ~0), so it is flat.
+   Spreads: not converted yet (median = mean).
    ===================================================================== */
-const MEDIAN_READY = false;
+const MEDIAN_READY = false;            // true once spreads are converted too; hides the notice
+const TOTAL_MEDIAN_SHIFT = -0.85;
 function toMedian(meanSpread, meanTotal){
-  return { spread: meanSpread, total: meanTotal };
+  return { spread: meanSpread, total: meanTotal + TOTAL_MEDIAN_SHIFT };
 }
 
 const TEAMS={ARI:'Arizona Cardinals',ATL:'Atlanta Falcons',BAL:'Baltimore Ravens',BUF:'Buffalo Bills',CAR:'Carolina Panthers',

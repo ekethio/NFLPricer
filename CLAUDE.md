@@ -90,12 +90,9 @@ Injuries:
 - Setting `injury_mode`: `"both"` (default) takes the adjustment off the injured team's points, moving spread and total; `"spread"` shifts it half from the injured team to the opponent, so the total stays fixed.
 - Adding a player from the official report pre-fills the chance from game status: Out 100%, Doubtful 75%, Questionable 25%. These are editable defaults, not a model.
 
-**Mean → median conversion is NOT implemented yet.** It's a placeholder at the top of the script:
-```js
-const MEDIAN_READY = false;
-function toMedian(meanSpread, meanTotal){ return { spread: meanSpread, total: meanTotal }; }
-```
-The owner has their own method and will explain it. Don't invent one. When it's added, set `MEDIAN_READY = true` to hide the on-page notice.
+**Mean → median conversion is half done** (`toMedian` at the top of the script):
+- **Totals:** median = mean − 0.85 (`TOTAL_MEDIAN_SHIFT`), chosen by the owner's call on 2026-09-26. Basis: 2015–2025 regular seasons, 2,895 games, closing total as the expected total; median minus mean of (actual − expected) was −0.85 pooled, negative in 9 of 11 seasons (range −1.79 to +0.92). A linear shift in the total had slope ≈ 0 (−0.85 at 40, −0.88 at 50), so it's flat. Pre-registered held-out test (fit 2015–2022, test 2023–2025) did not show a lower absolute error for the shifted line (10.15 vs 10.12, within noise) because 2024–2025 scoring ran ~1 point above closing lines, a level miss the shift doesn't address. 2025 alone: mean 46.03, median 45.0.
+- **Spreads:** not converted (median = mean). The owner has their own method; don't invent one. When spreads are done, set `MEDIAN_READY = true` to hide the on-page notice.
 
 User data lives in `localStorage` under `nflpricer.v1` (`{ratings, settings, injuries}`), with download/load backup buttons. Nothing is sent anywhere. A returning visitor's saved ratings override `ratings.json`, so after changing starting ratings, the owner clicks "Reset ratings to the site's starting values."
 
@@ -120,7 +117,7 @@ All tests were in-sample on nflverse data unless noted. The owner prefers **pre-
 
 ## Open items
 
-1. **Mean → median conversion.** Get the method from the owner, implement `toMedian`, and add tests.
+1. **Mean → median conversion for spreads.** Totals are done (flat −0.85). Get the spread method from the owner, implement it in `toMedian`, and add tests.
 2. Decide whether injuries should move totals by default (currently yes).
 3. Consider porting the QB props, defense vs. QB, and pressure views into the site, refreshed by the update script.
 4. Keep a weekly archive (injury history, ratings snapshots) if timing of news vs. line moves matters.
