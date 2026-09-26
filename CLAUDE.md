@@ -98,7 +98,7 @@ User data lives in `localStorage` under `nflpricer.v1` (`{ratings, settings, inj
 
 Tabs: This week (all games in a selected week, priced, with market spread/total and "Model likes": market spread − model median spread, and model median total − market total), Matchup, Injuries, Ratings (editable, sortable, with 2026 EPA/play and YPP for offense and defense, an Averages panel, and an average row), Settings.
 
-The **Averages panel** compares the ratings' implied points per drive, drives per team, and points per game (average vs. average team, no home field) with actual 2026 so far and the full 2025 season. It also flags any gap between average ORTG and average DRTG (they should match; pricing uses the midpoint). As of late September 2026: ratings imply 2.171 points per drive and 46.5 points per game, vs. 2026 actual 2.091 / 45.1 (Weeks 1–3, 33 games) and 2025 actual 2.148 / 46.0.
+The **Averages panel** compares the ratings' implied points per drive, drives per team, and points per game (average vs. average team, no home field) with actual 2026 so far and the full 2025 season. It also flags any gap between average ORTG and average DRTG (they should match; pricing uses the midpoint). As of 2026-09-26: the starting ratings are the owner's edited set (downloaded from their browser) with every ORTG and DRTG lowered by 0.019, which cuts totals ~0.4 (0.38–0.44 by pace) and leaves spreads unchanged. They imply 2.133 points per drive and 45.6 points per game, vs. 2026 actual 2.091 / 45.1 (Weeks 1–3, 33 games) and 2025 actual 2.148 / 46.0.
 
 ## Findings from analysis (keep these in mind)
 
