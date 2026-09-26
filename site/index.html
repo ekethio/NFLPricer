@@ -63,7 +63,8 @@ td input{width:74px;text-align:right}
 .grid .ct{display:block;font-family:var(--body);font-size:.7rem;color:var(--muted);font-weight:500}
 .placeholder{border-left:4px solid var(--accent);background:var(--surface);padding:10px 14px;margin:0 0 16px;max-width:72ch;font-size:.88rem}
 .empty{color:var(--muted);padding:10px 0}
-@media (max-width:640px){main{padding:12px 12px 40px}.brand{padding:12px 12px 4px}.result{grid-template-columns:1fr}
+@media (max-width:640px){#week-table table{font-size:.8rem}#week-table th,#week-table td{padding:6px 5px}
+  main{padding:12px 12px 40px}.brand{padding:12px 12px 4px}.result{grid-template-columns:1fr}
   .fields label{flex:1 1 140px}.fields select,.fields input{width:100%;min-width:0}}
 </style>
 </head>
@@ -85,8 +86,8 @@ td input{width:74px;text-align:right}
     <h2>This week's games</h2>
     <p class="lede">Every game priced with your ratings and injury adjustments. Home field moves the spread, not the total.
       Market lines are the spread and total nflverse publishes with its schedule (not a specific sportsbook), refreshed with the site's data.
-      "Model likes" compares your median lines with the market (a market line is the number each side covers half the time):
-      "BUF by 1.5" means your line has BUF 1.5 points better than the market does.</p>
+      "Your line" is your median line, since a market line is the number each side covers half the time.
+      "Model likes BUF by 1.5" means your line has BUF 1.5 points better than the market does. Wide tables scroll sideways.</p>
     <div class="fields" style="margin-bottom:12px"><label>Week<select id="wk"></select></label></div>
     <div class="scroll" id="week-table"></div>
   </section>
@@ -215,20 +216,20 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 function renderWeek(){
   const wk=+$('wk').value;const games=SCHED.games.filter(g=>g[0]===wk);
   if(!games.length){$('week-table').innerHTML='<p class="empty" style="padding:12px">No games found for this week.</p>';return}
-  let h='<table><thead><tr class="group"><th colspan="3"></th><th colspan="4">Your model</th><th colspan="2">Market</th><th colspan="2">Model likes (vs market)</th><th></th></tr>'+
-    '<tr><th class="l">Game</th><th class="l">Kickoff</th><th>Injuries (away / home)</th><th>Mean spread</th><th>Mean total</th><th>Median spread</th><th>Median total</th>'+
-    '<th>Spread</th><th>Total</th><th>Spread</th><th>Total</th><th>Final</th></tr></thead><tbody>';
+  let h='<table><thead><tr class="group"><th></th><th colspan="3">Spread</th><th colspan="3">Total</th><th colspan="2">Your mean line</th><th colspan="3"></th></tr>'+
+    '<tr><th class="l">Game</th><th>Your line</th><th>Market</th><th>Model likes</th><th>Your line</th><th>Market</th><th>Model likes</th>'+
+    '<th>Spread</th><th>Total</th><th>Injuries (away / home)</th><th class="l">Kickoff</th><th>Final</th></tr></thead><tbody>';
   games.forEach(g=>{const [w,day,time,A,H,as,hs,loc,mktS,mktT]=g;const neutral=loc==='Neutral';const p=price(H,A,neutral);
     const d=new Date(day+'T12:00:00');const ko=d.toLocaleDateString([], {weekday:'short',month:'short',day:'numeric'})+(time?' '+time:'');
     // Spread edge: points the model favors a side by beyond the market. Total edge: model minus market.
     const sE=mktS==null?null:mktS-p.medSpread, tE=mktT==null?null:p.medTotal-mktT;
     const sTxt=sE==null?'–':Math.abs(sE)<0.05?'Even':`${sE>0?H:A} by ${f1(Math.abs(sE))}`;
     const tTxt=tE==null?'–':Math.abs(tE)<0.05?'Even':`${tE>0?'Over':'Under'} by ${f1(Math.abs(tE))}`;
-    h+=`<tr><td class="l"><span class="tm">${A} @ ${H}</span>${neutral?' <span class="sub">(neutral)</span>':''}</td><td class="l sub">${esc(ko)}</td>
-      <td>${p.ia?'−'+f1(p.ia):'0'} / ${p.ih?'−'+f1(p.ih):'0'}</td>
-      <td>${lineTxt(p.meanSpread,H,A)}</td><td>${f1(p.meanTotal)}</td><td>${lineTxt(p.medSpread,H,A)}</td><td>${f1(p.medTotal)}</td>
-      <td>${mktS==null?'–':lineTxt(mktS,H,A)}</td><td>${mktT==null?'–':f1(mktT)}</td>
-      <td class="tm">${sTxt}</td><td class="tm">${tTxt}</td>
+    h+=`<tr><td class="l"><span class="tm">${A} @ ${H}</span>${neutral?' <span class="sub">(neutral)</span>':''}</td>
+      <td>${lineTxt(p.medSpread,H,A)}</td><td>${mktS==null?'–':lineTxt(mktS,H,A)}</td><td class="tm">${sTxt}</td>
+      <td>${f1(p.medTotal)}</td><td>${mktT==null?'–':f1(mktT)}</td><td class="tm">${tTxt}</td>
+      <td class="sub">${lineTxt(p.meanSpread,H,A)}</td><td class="sub">${f1(p.meanTotal)}</td>
+      <td>${p.ia?'−'+f1(p.ia):'0'} / ${p.ih?'−'+f1(p.ih):'0'}</td><td class="l sub">${esc(ko)}</td>
       <td class="sub">${as!=null&&hs!=null?`${A} ${as}, ${H} ${hs}`:''}</td></tr>`;});
   $('week-table').innerHTML=h+'</tbody></table>';
 }
