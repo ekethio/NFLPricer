@@ -104,6 +104,29 @@ try:
         }
     if tot[2]:
         eff["league"] = {"epa": round(tot[0] / tot[2], 4), "ypp": round(tot[1] / tot[2], 3)}
+
+    # Actual points per drive and drives per game (all points, every drive)
+    drives, final = {}, {}
+    for r in pbp:
+        g = r["game_id"]
+        if r["posteam"] and r["fixed_drive"] not in ("", "NA"):
+            drives.setdefault((g, r["posteam"]), set()).add(r["fixed_drive"])
+        pid = fnum(r["play_id"]) or 0
+        if g not in final or pid > final[g][0]:
+            final[g] = (pid, r["home_team"], r["away_team"], fnum(r["total_home_score"]) or 0, fnum(r["total_away_score"]) or 0)
+    pts = n_drv = team_games = 0
+    for g, (_, home, away, hs, as_) in final.items():
+        for team, p in ((home, hs), (away, as_)):
+            d = len(drives.get((g, team), ()))
+            if d:
+                pts += p; n_drv += d; team_games += 1
+    if n_drv:
+        eff["league"].update({
+            "ppd": round(pts / n_drv, 4),
+            "drives_per_team_game": round(n_drv / team_games, 3),
+            "points_per_game": round(2 * pts / team_games, 2),
+            "games": team_games // 2,
+        })
     eff["weeks"] = sorted({int(r["week"]) for r in pbp})
 
     last = max(eff["weeks"])

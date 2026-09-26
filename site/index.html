@@ -83,7 +83,7 @@ td input{width:74px;text-align:right}
 
   <section id="tab-week">
     <h2>This week's games</h2>
-    <p class="lede">Every game priced with your ratings and injury adjustments. Lines are from the home team's side.</p>
+    <p class="lede">Every game priced with your ratings and injury adjustments. Home field moves the spread, not the total.</p>
     <div class="fields" style="margin-bottom:12px"><label>Week<select id="wk"></select></label></div>
     <div class="scroll" id="week-table"></div>
   </section>
@@ -119,6 +119,7 @@ td input{width:74px;text-align:right}
   <section id="tab-ratings" hidden>
     <h2>Team ratings</h2>
     <p class="lede" id="ratings-lede"></p>
+    <div class="panel" id="avg-panel"></div>
     <div class="scroll" id="ratings-table"></div>
     <p style="margin-top:12px"><button class="btn" id="reset-ratings">Reset ratings to the site's starting values</button></p>
   </section>
@@ -177,7 +178,7 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const f1=v=>Number(v).toFixed(1);
 
-let BASE=null, SCHED=null, INJ=null, META=null, EFF=null, U=null;
+let BASE=null, SCHED=null, INJ=null, META=null, EFF=null, REF=null, U=null;
 
 /* ---------- storage ---------- */
 function freshUser(){return{ratings:JSON.parse(JSON.stringify(BASE.teams)),
@@ -193,7 +194,7 @@ function price(H,A,neutral){
   const h=rating(H),a=rating(A),avg=avgPPD(),S=U.settings;
   const drives=S.league_avg_drives+(+h.drives)+(+a.drives);
   const hfa=neutral?0:(h.hfa==null||h.hfa===''?S.default_hfa:+h.hfa);
-  let hp=(+h.oppd + +a.dppd - avg)*drives+hfa, ap=(+a.oppd + +h.dppd - avg)*drives;
+  let hp=(+h.oppd + +a.dppd - avg)*drives+hfa/2, ap=(+a.oppd + +h.dppd - avg)*drives-hfa/2;
   const ih=H==='AVG'?0:injAdj(H), ia=A==='AVG'?0:injAdj(A);
   if(S.injury_mode==='spread'){hp+=(-ih+ia)/2;ap+=(ih-ia)/2}else{hp-=ih;ap-=ia}
   const meanSpread=ap-hp, meanTotal=hp+ap, med=toMedian(meanSpread,meanTotal);
@@ -270,6 +271,31 @@ function renderInjBody(){
 
 /* ---------- ratings ---------- */
 let rSort={k:'team',asc:true};
+function ratingAverages(){
+  const r=ABBRS.map(t=>U.ratings[t]),n=r.length,S=U.settings;
+  const o=r.reduce((a,x)=>a+ +x.oppd,0)/n,d=r.reduce((a,x)=>a+ +x.dppd,0)/n,dr=r.reduce((a,x)=>a+ +x.drives,0)/n;
+  const h=r.reduce((a,x)=>a+(x.hfa==null||x.hfa===''?S.default_hfa:+x.hfa),0)/n;
+  const ppd=(o+d)/2, drives=S.league_avg_drives+dr;
+  return{o,d,dr,h,ppd,drives,ppg:2*ppd*drives,rating:(o-d)*S.league_avg_drives};
+}
+function renderAverages(){
+  const A=ratingAverages(),L=(EFF&&EFF.league)||{},wk=EFF&&EFF.weeks&&EFF.weeks.length?`Weeks ${EFF.weeks[0]}–${EFF.weeks[EFF.weeks.length-1]}`:'';
+  const diff=(mine,act,d)=>act==null?'':`<span class="sub"> (${mine-act>0?'+':''}${(mine-act).toFixed(d)})</span>`;
+  const v=(x,d)=>x==null?'–':Number(x).toFixed(d);
+  const gap=A.o-A.d;
+  $('avg-panel').innerHTML=`<h3 style="margin-top:0">Averages</h3>
+  <p class="sub" style="margin:0 0 10px;max-width:72ch">Your ratings should average out close to what's actually happening. The number in parentheses is your figure minus the 2026 actual.</p>
+  <div class="scroll"><table><thead><tr><th class="l"></th><th>Your ratings</th><th>2026 actual${wk?` <span class="sub">(${wk}, ${L.games||0} games)</span>`:''}</th><th>${REF?esc(REF.label):'2025 actual'}</th></tr></thead><tbody>
+    <tr><td class="l">Points per drive</td><td><b>${v(A.ppd,3)}</b>${diff(A.ppd,L.ppd,3)}</td><td>${v(L.ppd,3)}</td><td>${v(REF&&REF.ppd,3)}</td></tr>
+    <tr><td class="l sub">&nbsp;&nbsp;Average ORTG</td><td>${v(A.o,3)}</td><td></td><td></td></tr>
+    <tr><td class="l sub">&nbsp;&nbsp;Average DRTG</td><td>${v(A.d,3)}</td><td></td><td></td></tr>
+    <tr><td class="l">Drives per team per game</td><td><b>${v(A.drives,2)}</b>${diff(A.drives,L.drives_per_team_game,2)}</td><td>${v(L.drives_per_team_game,2)}</td><td>${v(REF&&REF.drives_per_team_game,2)}</td></tr>
+    <tr><td class="l">Points per game, both teams</td><td><b>${v(A.ppg,1)}</b>${diff(A.ppg,L.points_per_game,1)}</td><td>${v(L.points_per_game,1)}</td><td>${v(REF&&REF.points_per_game,1)}</td></tr>
+  </tbody></table></div>
+  <p class="sub" style="margin:10px 0 0;max-width:72ch">Your points per game is an average team against an average team, both sides combined. Home field moves the spread only, so it isn't part of the total. ${Math.abs(gap)<0.005?'Average ORTG and DRTG match, so your ratings are balanced.':`Average ORTG is ${gap>0?'higher':'lower'} than average DRTG by ${Math.abs(gap).toFixed(3)}. In a balanced set they match, since every point scored is a point allowed; pricing uses the midpoint.`}</p>`;
+  const set=(id,t)=>{const e=$(id);if(e)e.innerHTML=t};
+  set('ft-o',v(A.o,3));set('ft-d',v(A.d,3));set('ft-dr',(A.dr>0?'+':'')+A.dr.toFixed(3));set('ft-h',v(A.h,2));set('ft-r',(A.rating>0?'+':'')+A.rating.toFixed(2));
+}
 function renderRatings(){
   const E=(EFF&&EFF.teams)||{}, wk=EFF&&EFF.weeks&&EFF.weeks.length?`Weeks ${EFF.weeks[0]}–${EFF.weeks[EFF.weeks.length-1]}`:'';
   $('ratings-lede').textContent=`ORTG and DRTG are points per drive against a league-average opponent. Drives is pace vs. league average. Leave home field blank to use the default. Rating = (ORTG − DRTG) × league avg drives, for viewing only. The 2026 columns are actual results${wk?` (${wk})`:''} for reference and aren't used in pricing.${EFF&&EFF.league&&EFF.league.epa!=null?` League EPA/play ${EFF.league.epa.toFixed(3)}, YPP ${EFF.league.ypp.toFixed(2)}.`:''}`;
@@ -287,12 +313,16 @@ function renderRatings(){
     col('o_epa','EPA/play')+col('o_ypp','YPP')+col('d_epa','EPA/play')+col('d_ypp','YPP')+'</tr></thead><tbody>'+
     rows.map(r=>`<tr><td class="l tm">${r.team}</td><td>${inp(r.t,'oppd','0.01')}</td><td>${inp(r.t,'dppd','0.01')}</td><td>${inp(r.t,'drives','0.01')}</td><td>${inp(r.t,'hfa','0.05')}</td>
       <td id="rt-${r.t}" class="${r.rating>0?'pos':r.rating<0?'neg':''}">${r.rating>0?'+':''}${r.rating.toFixed(2)}</td>
-      <td>${epa(r.o_epa,false)}</td><td>${ypp(r.o_ypp)}</td><td>${epa(r.d_epa,true)}</td><td>${ypp(r.d_ypp)}</td></tr>`).join('')+'</tbody></table>';
+      <td>${epa(r.o_epa,false)}</td><td>${ypp(r.o_ypp)}</td><td>${epa(r.d_epa,true)}</td><td>${ypp(r.d_ypp)}</td></tr>`).join('')+'</tbody>'+
+    `<tfoot><tr style="font-weight:600;background:var(--sunk)"><td class="l">Average</td><td id="ft-o"></td><td id="ft-d"></td><td id="ft-dr"></td><td id="ft-h"></td><td id="ft-r"></td>
+      <td>${EFF&&EFF.league&&EFF.league.epa!=null?EFF.league.epa.toFixed(3):'–'}</td><td>${EFF&&EFF.league&&EFF.league.ypp!=null?EFF.league.ypp.toFixed(2):'–'}</td>
+      <td>${EFF&&EFF.league&&EFF.league.epa!=null?EFF.league.epa.toFixed(3):'–'}</td><td>${EFF&&EFF.league&&EFF.league.ypp!=null?EFF.league.ypp.toFixed(2):'–'}</td></tr></tfoot></table>`;
+  renderAverages();
   $('ratings-table').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const s=b.dataset.s;rSort=rSort.k===s?{k:s,asc:!rSort.asc}:{k:s,asc:s==='team'};renderRatings()});
   $('ratings-table').querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>{const t=i.dataset.t,k=i.dataset.k;
     U.ratings[t][k]=k==='hfa'&&i.value.trim()===''?null:(parseFloat(i.value)||0);
     const r=(U.ratings[t].oppd-U.ratings[t].dppd)*U.settings.league_avg_drives;const c=$('rt-'+t);c.textContent=(r>0?'+':'')+r.toFixed(2);c.className=r>0?'pos':r<0?'neg':'';
-    save();refreshPrices();}));
+    save();refreshPrices();renderAverages();}));
 }
 $('reset-ratings').onclick=()=>{if(!confirm('Replace all your ratings with the site\u2019s starting values?'))return;U.ratings=JSON.parse(JSON.stringify(BASE.teams));save();renderRatings();refreshPrices()};
 
@@ -320,6 +350,7 @@ function renderAll(){renderRatings();renderSettings();renderInjGrid();if(injTeam
     const get=p=>fetch(p,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(p);return r.json()});
     [BASE,SCHED,INJ,META]=await Promise.all([get('data/ratings.json'),get('data/schedule.json'),get('data/injuries.json'),get('data/meta.json')]);
     EFF=await get('data/efficiency.json').catch(()=>null);
+    REF=await get('data/reference.json').catch(()=>null);
   }catch(e){$('stamp').textContent='Couldn\u2019t load the data files. Refresh the page to try again.';return}
   U=load()||freshUser();U.injuries=U.injuries||{};
   ABBRS.forEach(t=>{if(!U.ratings[t])U.ratings[t]=JSON.parse(JSON.stringify(BASE.teams[t]))});

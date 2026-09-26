@@ -4,14 +4,14 @@
  "default_hfa": 1.75,
  "teams": {
   "ARI": {
-   "oppd": 1.986,
-   "dppd": 2.407,
+   "oppd": 2.016,
+   "dppd": 2.347,
    "drives": -0.303,
    "hfa": null
   },
   "ATL": {
-   "oppd": 2.068,
-   "dppd": 2.233,
+   "oppd": 2.058,
+   "dppd": 2.243,
    "drives": 0.285,
    "hfa": null
   },
@@ -23,18 +23,18 @@
   },
   "BUF": {
    "oppd": 2.74,
-   "dppd": 2.15,
+   "dppd": 2.19,
    "drives": -0.303,
    "hfa": null
   },
   "CAR": {
-   "oppd": 2.1,
-   "dppd": 2.345,
+   "oppd": 2.13,
+   "dppd": 2.315,
    "drives": -0.833,
    "hfa": null
   },
   "CHI": {
-   "oppd": 2.1,
+   "oppd": 2.09,
    "dppd": 2.34,
    "drives": 0.461,
    "hfa": null
@@ -46,8 +46,8 @@
    "hfa": null
   },
   "CLE": {
-   "oppd": 1.642,
-   "dppd": 2.107,
+   "oppd": 1.532,
+   "dppd": 2.167,
    "drives": 0.991,
    "hfa": null
   },
@@ -59,139 +59,139 @@
   },
   "DEN": {
    "oppd": 2.089,
-   "dppd": 1.9,
+   "dppd": 1.92,
    "drives": 0.579,
    "hfa": null
   },
   "DET": {
-   "oppd": 2.45,
-   "dppd": 2.22,
+   "oppd": 2.47,
+   "dppd": 2.26,
    "drives": 0.403,
    "hfa": null
   },
   "GB": {
-   "oppd": 2.26,
+   "oppd": 2.27,
    "dppd": 2.33,
    "drives": -0.833,
    "hfa": null
   },
   "HOU": {
    "oppd": 2.04,
-   "dppd": 1.78,
+   "dppd": 1.86,
    "drives": 0.932,
    "hfa": null
   },
   "IND": {
-   "oppd": 1.948,
-   "dppd": 2.38,
+   "oppd": 2.158,
+   "dppd": 2.39,
    "drives": -0.48,
    "hfa": null
   },
   "JAX": {
-   "oppd": 2.35,
-   "dppd": 2.04,
+   "oppd": 2.37,
+   "dppd": 2.08,
    "drives": 0.638,
    "hfa": null
   },
   "KC": {
-   "oppd": 2.48,
+   "oppd": 2.49,
    "dppd": 2.12,
    "drives": -0.715,
    "hfa": null
   },
   "LA": {
-   "oppd": 2.6,
-   "dppd": 2.0,
+   "oppd": 2.57,
+   "dppd": 2,
    "drives": 0.108,
    "hfa": null
   },
   "LAC": {
-   "oppd": 2.149,
-   "dppd": 2.15,
+   "oppd": 2.189,
+   "dppd": 2.1,
    "drives": -0.303,
    "hfa": null
   },
   "LV": {
-   "oppd": 2.054,
-   "dppd": 2.327,
+   "oppd": 1.844,
+   "dppd": 2.287,
    "drives": -0.009,
    "hfa": null
   },
   "MIA": {
-   "oppd": 1.769,
-   "dppd": 2.502,
+   "oppd": 1.729,
+   "dppd": 2.492,
    "drives": -0.244,
    "hfa": null
   },
   "MIN": {
-   "oppd": 2.0,
-   "dppd": 1.89,
+   "oppd": 1.98,
+   "dppd": 1.91,
    "drives": 0.403,
    "hfa": null
   },
   "NE": {
-   "oppd": 2.3,
-   "dppd": 2.0,
+   "oppd": 2.28,
+   "dppd": 2.02,
    "drives": -0.127,
    "hfa": null
   },
   "NO": {
-   "oppd": 2.05,
-   "dppd": 2.252,
+   "oppd": 2.04,
+   "dppd": 2.262,
    "drives": -0.127,
    "hfa": null
   },
   "NYG": {
-   "oppd": 1.82,
-   "dppd": 2.276,
+   "oppd": 1.81,
+   "dppd": 2.316,
    "drives": -0.48,
    "hfa": null
   },
   "NYJ": {
-   "oppd": 1.994,
-   "dppd": 2.25,
+   "oppd": 1.974,
+   "dppd": 2.13,
    "drives": 0.285,
    "hfa": null
   },
   "PHI": {
    "oppd": 2.28,
-   "dppd": 1.93,
+   "dppd": 1.95,
    "drives": -0.009,
    "hfa": null
   },
   "PIT": {
-   "oppd": 1.881,
-   "dppd": 2.17,
+   "oppd": 1.871,
+   "dppd": 2.15,
    "drives": -0.009,
    "hfa": null
   },
   "SEA": {
-   "oppd": 2.14,
-   "dppd": 1.7,
+   "oppd": 2.2,
+   "dppd": 1.77,
    "drives": 0.638,
    "hfa": null
   },
   "SF": {
-   "oppd": 2.601,
-   "dppd": 2.1,
+   "oppd": 2.561,
+   "dppd": 2.12,
    "drives": -0.597,
    "hfa": null
   },
   "TB": {
-   "oppd": 2.101,
-   "dppd": 2.264,
+   "oppd": 2.091,
+   "dppd": 2.274,
    "drives": 0.344,
    "hfa": null
   },
   "TEN": {
-   "oppd": 1.789,
-   "dppd": 2.379,
+   "oppd": 1.799,
+   "dppd": 2.359,
    "drives": 0.285,
    "hfa": null
   },
   "WAS": {
-   "oppd": 1.914,
-   "dppd": 2.407,
+   "oppd": 1.894,
+   "dppd": 2.377,
    "drives": -0.715,
    "hfa": null
   }
