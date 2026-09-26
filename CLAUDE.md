@@ -66,11 +66,11 @@ Ratings are per team, entered as absolute values:
 - **Drives:** pace as a differential vs. league average (+1 = one more drive per game than average). Drives reflect both tempo and efficiency (bad offenses and good defenses both create more drives); that's intended.
 - **Home field:** points per team; blank means the default (1.75).
 
-Do **not** rename the internal keys `oppd`/`dppd`. Users' saved browser data depends on them. Only the labels changed to ORTG/DRTG.
+Do **not** rename the internal keys `oppd`/`dppd`, or change what they store. Users' saved browser data depends on them. They hold **absolute** points per drive; since 2026-09-26 the Ratings tab **shows and edits them as differences from `league_avg_ppd`** (a setting, like `league_avg_drives`; in `ratings.json` and user settings). Saved data from before that has no `league_avg_ppd`; `migrate()` sets it to the mean of that data's 64 values, which reproduces its old prices exactly. Changing the league average in Settings shifts every `oppd`/`dppd` by the same amount, so differences stay put. The starting ratings are normalized: ORTG and DRTG differences each sum to exactly 0, so average Rating is 0.
 
 Game math (additive, the owner's naive starting point):
 ```
-LeagueAvgPPD = mean of all 32 ORTG and all 32 DRTG values (64 numbers), recalculated live
+LeagueAvgPPD = settings.league_avg_ppd (starting value 2.133). Before 2026-09-26 it was the live mean of all 64 values.
 GameDrives   = LeagueAvgDrives + Drives_home + Drives_away      (summed, not averaged)
 HomePPD      = ORTG_home + DRTG_away − LeagueAvgPPD
 AwayPPD      = ORTG_away + DRTG_home − LeagueAvgPPD
