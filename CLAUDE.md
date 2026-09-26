@@ -44,7 +44,7 @@ nflverse release URLs (base `https://github.com/nflverse/nflverse-data/releases/
 | FTN charting | `ftn_charting/ftn_charting_{season}.csv` |
 
 What the script produces:
-- **schedule.json:** season, current week (lowest week with an unplayed game), and every regular-season game as `[week, gameday, gametime, away, home, away_score, home_score, location]`. `location` is `"Home"` or `"Neutral"`.
+- **schedule.json:** season, current week (lowest week with an unplayed game), and every regular-season game as `[week, gameday, gametime, away, home, away_score, home_score, location, market_spread, market_total]`. `location` is `"Home"` or `"Neutral"`. Market lines come from nflverse's `spread_line` / `total_line` (not a named sportsbook; current line for upcoming games, closing line for played ones; usually posted about a week ahead). nflverse's `spread_line` is positive when home is favored; the script flips it to the site's convention (negative = home favored).
 - **injuries.json:** the latest week of the official report per team (`[name, pos, injury, practice_status, game_status]`), falling back to the practice-report injury field when the game-report field is blank. Plus `left_game`: players whose play-by-play shows "was injured during the play" with no later "has returned to the game," for the last played week.
 - **efficiency.json:** per team, offense and defense EPA/play and yards/play (pass and run plays with non-null EPA), plus league EPA, YPP, points per drive, drives per team-game, points per game, and game count.
 - **meta.json:** update time, season, current week, notes.
@@ -99,7 +99,7 @@ The owner has their own method and will explain it. Don't invent one. When it's 
 
 User data lives in `localStorage` under `nflpricer.v1` (`{ratings, settings, injuries}`), with download/load backup buttons. Nothing is sent anywhere. A returning visitor's saved ratings override `ratings.json`, so after changing starting ratings, the owner clicks "Reset ratings to the site's starting values."
 
-Tabs: This week (all games in a selected week, priced), Matchup, Injuries, Ratings (editable, sortable, with 2026 EPA/play and YPP for offense and defense, an Averages panel, and an average row), Settings.
+Tabs: This week (all games in a selected week, priced, with market spread/total and "Model likes": market spread − model median spread, and model median total − market total), Matchup, Injuries, Ratings (editable, sortable, with 2026 EPA/play and YPP for offense and defense, an Averages panel, and an average row), Settings.
 
 The **Averages panel** compares the ratings' implied points per drive, drives per team, and points per game (average vs. average team, no home field) with actual 2026 so far and the full 2025 season. It also flags any gap between average ORTG and average DRTG (they should match; pricing uses the midpoint). As of late September 2026: ratings imply 2.171 points per drive and 46.5 points per game, vs. 2026 actual 2.091 / 45.1 (Weeks 1–3, 33 games) and 2025 actual 2.148 / 46.0.
 

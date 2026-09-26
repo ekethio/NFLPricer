@@ -27,6 +27,13 @@ def num(v):
         return None
 
 
+def flt(v):
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
 def save(name, obj):
     with open(os.path.join(OUT, name), "w") as f:
         json.dump(obj, f, separators=(",", ":"))
@@ -43,11 +50,15 @@ try:
     games = [r for r in reg if int(r["season"]) == season]
     unplayed = [int(r["week"]) for r in games if r["home_score"] in ("", "NA")]
     current_week = min(unplayed) if unplayed else max(int(r["week"]) for r in games)
+    # nflverse spread_line is positive when the home team is favored; the site uses the
+    # opposite sign (negative = home favored), so it is flipped here.
+    market_spread = lambda r: None if flt(r.get("spread_line")) is None else -flt(r["spread_line"]) + 0.0
     save("schedule.json", {
         "season": season,
         "current_week": current_week,
         "games": [[int(r["week"]), r["gameday"], r["gametime"], r["away_team"], r["home_team"],
-                   num(r["away_score"]), num(r["home_score"]), r.get("location", "")]
+                   num(r["away_score"]), num(r["home_score"]), r.get("location", ""),
+                   market_spread(r), flt(r.get("total_line"))]
                   for r in sorted(games, key=lambda r: (int(r["week"]), r["gameday"], r["gametime"]))],
     })
 except Exception as e:
